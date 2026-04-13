@@ -1,45 +1,36 @@
-# --- Reset Function ---
-def on_button_pressed_a():
-    global power
-    # Move servo back to start position (0 degrees)
-    fwdMotors.set_angle(fwdBase.left_servo, 0)
-    # Clear the power variable
-    power = 0
+# Solar Power & Servo Tracker
 
-input.on_button_pressed(Button.A, on_button_pressed_a)
+A micro:bit project that uses the Climate Action / Forward Education kit to monitor electrical power and automatically adjust a servo motor (likely for a solar panel) based on power output.
 
-# --- Power Calculation ---
-def calculatePower():
-    global current_Amps, power
-    # Read current in milliamps and convert to Amps (I)
-    current_Amps = fwdSensors.current1.current() / 1000
-    # Calculate Power (P = I * V) using voltage sensor data
-    power = current_Amps * fwdSensors.voltage1.voltage()
+## 🚀 Overview
 
-# --- Initial Setup ---
-power = 0
-current_Amps = 0
-# Move servo to starting position at boot
-fwdMotors.set_angle(fwdBase.left_servo, 0)
+This code measures real-time current and voltage to calculate electrical power. It uses a "seek" behavior where a servo motor rotates to find the position that yields the highest power. If the power falls below a certain threshold, the servo continues to scan; once significant power is detected, it displays a bar graph of the output.
 
-# --- Main Logic Loop ---
-def on_forever():
-    calculatePower()
-    
-    # Check if we have found a significant power source (> 0.3 Watts)
-    if power > 0.3:
-        # Display the power level as a bar graph on the LEDs
-        led.plot_bar_graph(power, 1000)
-    else:
-        # If power is low, keep searching:
-        basic.show_icon(IconNames.SMALL_DIAMOND)
-        
-        # Increment servo angle by 10 degrees to "seek" better light/power
-        fwdMotors.set_angle(fwdBase.left_servo,
-            fwdMotors.get_angle(fwdBase.left_servo) + 10)
-        
-        # If we reach the end of the rotation (180 deg), reset to 0
-        if fwdMotors.get_angle(fwdBase.left_servo) > 180:
-            fwdMotors.set_angle(fwdBase.left_servo, 0)
+## 🛠 Features
 
-basic.forever(on_forever)
+* **Real-time Power Calculation:** Uses the formula `P = I * V` (Power = Current * Voltage).
+* **Automated Scanning:** The servo rotates in 10-degree increments to find the best angle for energy collection.
+* **Visual Feedback:** * Displays a **Small Diamond** while scanning.
+  * Displays a **Bar Graph** when power exceeds 0.3W.
+* **Manual Reset:** Button A allows for an immediate reset of the servo position and power variables.
+
+## 🕹 Controls
+
+| Input | Action |
+| :--- | :--- |
+| **Button A** | Resets servo angle to 0° and clears power variable. |
+| **Automatic** | Servo scans from 0° to 180° until power > 0.3W is detected. |
+
+## 📋 Hardware Requirements
+
+* [micro:bit V2](https://microbit.org/)
+* [Forward Education (fwd) Breakout Board](https://forwardedu.com/)
+* 1x Position Servo (connected to `left_servo` port)
+* 1x Voltage/Current Sensor (connected to `voltage1` and `current1` ports)
+
+## ⚙️ Setup & Installation
+
+1. Open [MakeCode for micro:bit](https://makecode.microbit.org/).
+2. Click on **Extensions** and search for `fwd-edu` to add the Forward Education blocks.
+3. Switch to the **Python** editor and paste the commented code provided.
+4. Download the code to your micro:bit.
